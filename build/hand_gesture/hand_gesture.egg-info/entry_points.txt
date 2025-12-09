@@ -1,0 +1,3 @@
+[console_scripts]
+gesture_node = hand_gesture.gesture_node:main
+robot_node = hand_gesture.robot_cmd_vel_controller:main
