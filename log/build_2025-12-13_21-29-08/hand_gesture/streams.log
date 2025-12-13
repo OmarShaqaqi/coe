@@ -1,0 +1,30 @@
+[0.759s] Invoking command in '/home/omar/Desktop/coe510/src/hand_gesture': PYTHONPATH=/home/omar/Desktop/coe510/build/hand_gesture/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/omar/Desktop/coe510/install/hand_gesture/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/hand_gesture build --build-base /home/omar/Desktop/coe510/build/hand_gesture/build install --record /home/omar/Desktop/coe510/build/hand_gesture/install.log --single-version-externally-managed install_data
+[0.961s] running egg_info
+[0.972s] writing ../../build/hand_gesture/hand_gesture.egg-info/PKG-INFO
+[0.973s] writing dependency_links to ../../build/hand_gesture/hand_gesture.egg-info/dependency_links.txt
+[0.974s] writing entry points to ../../build/hand_gesture/hand_gesture.egg-info/entry_points.txt
+[0.974s] writing requirements to ../../build/hand_gesture/hand_gesture.egg-info/requires.txt
+[0.974s] writing top-level names to ../../build/hand_gesture/hand_gesture.egg-info/top_level.txt
+[0.999s] reading manifest file '../../build/hand_gesture/hand_gesture.egg-info/SOURCES.txt'
+[0.999s] adding license file 'LICENSE'
+[1.000s] writing manifest file '../../build/hand_gesture/hand_gesture.egg-info/SOURCES.txt'
+[1.000s] running build
+[1.000s] running build_py
+[1.001s] copying hand_gesture/__init__.py -> /home/omar/Desktop/coe510/build/hand_gesture/build/lib/hand_gesture
+[1.001s] copying hand_gesture/robot_cmd_vel_controller.py -> /home/omar/Desktop/coe510/build/hand_gesture/build/lib/hand_gesture
+[1.001s] copying hand_gesture/gesture_node.py -> /home/omar/Desktop/coe510/build/hand_gesture/build/lib/hand_gesture
+[1.001s] running install
+[1.005s] running install_lib
+[1.021s] copying /home/omar/Desktop/coe510/build/hand_gesture/build/lib/hand_gesture/gesture_node.py -> /home/omar/Desktop/coe510/install/hand_gesture/lib/python3.10/site-packages/hand_gesture
+[1.021s] byte-compiling /home/omar/Desktop/coe510/install/hand_gesture/lib/python3.10/site-packages/hand_gesture/gesture_node.py to gesture_node.cpython-310.pyc
+[1.022s] running install_data
+[1.023s] copying resource/hand_gesture -> /home/omar/Desktop/coe510/install/hand_gesture/share/ament_index/resource_index/packages
+[1.023s] copying package.xml -> /home/omar/Desktop/coe510/install/hand_gesture/share/hand_gesture
+[1.024s] running install_egg_info
+[1.038s] removing '/home/omar/Desktop/coe510/install/hand_gesture/lib/python3.10/site-packages/hand_gesture-0.0.0-py3.10.egg-info' (and everything under it)
+[1.040s] Copying ../../build/hand_gesture/hand_gesture.egg-info to /home/omar/Desktop/coe510/install/hand_gesture/lib/python3.10/site-packages/hand_gesture-0.0.0-py3.10.egg-info
+[1.041s] running install_scripts
+[1.070s] Installing gesture_node script to /home/omar/Desktop/coe510/install/hand_gesture/lib/hand_gesture
+[1.070s] Installing robot_node script to /home/omar/Desktop/coe510/install/hand_gesture/lib/hand_gesture
+[1.070s] writing list of installed files to '/home/omar/Desktop/coe510/build/hand_gesture/install.log'
+[1.094s] Invoked command in '/home/omar/Desktop/coe510/src/hand_gesture' returned '0': PYTHONPATH=/home/omar/Desktop/coe510/build/hand_gesture/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/omar/Desktop/coe510/install/hand_gesture/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/hand_gesture build --build-base /home/omar/Desktop/coe510/build/hand_gesture/build install --record /home/omar/Desktop/coe510/build/hand_gesture/install.log --single-version-externally-managed install_data

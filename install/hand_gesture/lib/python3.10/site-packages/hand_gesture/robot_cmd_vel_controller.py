@@ -1,127 +1,129 @@
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 import time
-
+import threading
 from robomaster import robot
 
 
-class RobotDriveAndGripperController(Node):
-    def __init__(self):
-        super().__init__("robot_drive_and_gripper_controller")
+ARM_STEP_X = 20   # mm per command
+ARM_STEP_Y = 20   # mm per command
 
-        self.get_logger().info("✅ Robot Drive + Gripper Controller Node Started")
+
+class RobotDriveArmGripperController(Node):
+    def __init__(self):
+        super().__init__("robot_drive_arm_gripper_controller")
+
+        self.get_logger().info("✅ Robot Drive + Robotic Arm + Gripper Controller Started")
 
         # ============================
-        # ✅ SUBSCRIBERS
+        # SUBSCRIBERS
         # ============================
 
         self.cmd_vel_sub = self.create_subscription(
-            Twist,
-            "/cmd_vel",
-            self.cmd_vel_callback,
-            10
+            Twist, "/cmd_vel", self.cmd_vel_callback, 10
+        )
+
+        self.arm_sub = self.create_subscription(
+            Twist, "/arm_cmd", self.arm_callback, 10
         )
 
         self.gripper_sub = self.create_subscription(
-            String,
-            "/gripper_cmd",
-            self.gripper_callback,
-            10
+            String, "/gripper_cmd", self.gripper_callback, 10
         )
 
         # ============================
-        # ✅ INITIALIZE ROBOT
+        # INIT ROBOT
         # ============================
 
-        self.ep_robot = robot.Robot()
-        try:
-            self.ep_robot.initialize(conn_type="sta")
-            self.get_logger().info("✅ RoboMaster Connected")
-        except Exception as e:
-            self.get_logger().error(f"❌ RoboMaster connection failed: {e}")
-            return
+        self.ep = robot.Robot()
+        self.ep.initialize(conn_type="sta")
 
-        self.chassis = self.ep_robot.chassis
-        self.gripper = self.ep_robot.gripper
+        self.chassis = self.ep.chassis
+        self.arm = self.ep.robotic_arm
+        self.gripper = self.ep.gripper
 
-        # ============================
-        # ✅ SAFETY VARIABLES
-        # ============================
+        self.arm.start()
+        self.arm_busy = False
 
-        self.last_cmd_time = time.time()
-        self.last_gripper_state = "HOLD"
+        self.last_drive_time = time.time()
 
-        # ✅ Auto-stop watchdog (every 0.1s)
-        self.safety_timer = self.create_timer(0.1, self.safety_check)
+        self.drive_watchdog = self.create_timer(0.1, self.drive_safety)
 
     # ============================
-    # ✅ DRIVE CALLBACK
+    # DRIVE
     # ============================
 
     def cmd_vel_callback(self, msg: Twist):
-        speed = msg.linear.x
-        turn = msg.angular.z
-
-        self.last_cmd_time = time.time()
-
+        self.last_drive_time = time.time()
+        z=msg.angular.z
+        if msg.linear.x != 0 :
+            z = 0
+            
         self.chassis.drive_speed(
-            x=speed,
+            x=msg.linear.x,
             y=0.0,
-            z=turn
+            z=z
         )
 
-        self.get_logger().info(
-            f"🚗 Drive → Speed: {speed:.2f} | Turn: {turn:.2f}"
-        )
-
-    # ============================
-    # ✅ SAFETY AUTO-STOP
-    # ============================
-
-    def safety_check(self):
-        if time.time() - self.last_cmd_time > 0.5:
+    def drive_safety(self):
+        if time.time() - self.last_drive_time > 0.5:
             self.chassis.drive_speed(0.0, 0.0, 0.0)
 
     # ============================
-    # ✅ GRIPPER CALLBACK
+    # ROBOTIC ARM
+    # ============================
+
+    def arm_callback(self, msg: Twist):
+        if self.arm_busy:
+            return
+
+        dx = msg.angular.x
+        dy = msg.angular.y
+        if dx == 0.0 and dy == 0.0:
+            return
+
+        self.arm_busy = True
+        print("outside")
+        threading.Thread(target=self._do_arm_move, args=(dx, dy), daemon=True).start()
+
+    def _do_arm_move(self, dx, dy):
+        try:
+            print("inside")
+            print(dx,dy)
+            ok = self.arm.move(dx, dy).wait_for_completed(1)   
+            print(ok)           # starts action
+            if not ok:
+                self.get_logger().warn("Arm move timed out")
+        except Exception as e:
+            self.get_logger().error(f"Arm move failed: {e}")
+        finally:
+            self.arm_busy = False
+
+    # ============================
+    # GRIPPER
     # ============================
 
     def gripper_callback(self, msg: String):
-        gripper_state = msg.data
-
-        if gripper_state == self.last_gripper_state:
-            return
-
-        self.last_gripper_state = gripper_state
-        self.get_logger().info(f"🖐️ Gripper Command → {gripper_state}")
-
-        # ✅ ONLY OPEN & CLOSE ARE SUPPORTED
-
-        if gripper_state == "OPEN":
+        if msg.data == "OPEN":
             self.gripper.open(power=50)
-            self.get_logger().info("✅ Gripper OPEN")
 
-        elif gripper_state == "CLOSE":
+        elif msg.data == "CLOSE":
             self.gripper.close(power=50)
-            self.get_logger().info("✅ Gripper CLOSE")
 
-        elif gripper_state in ["UP", "DOWN"]:
-            self.get_logger().warn(
-                "⚠️ UP / DOWN ignored — Standard RoboMaster EP gripper has NO lift motor"
-            )
-
-        elif gripper_state == "HOLD":
-            pass
-
-        else:
-            self.get_logger().warn(f"⚠️ Unknown gripper command: {gripper_state}")
+        elif msg.data == "HOLD":
+            self.gripper.pause()
 
 
 def main():
     rclpy.init()
-    node = RobotDriveAndGripperController()
+    node = RobotDriveArmGripperController()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
